@@ -15,9 +15,11 @@ saveDir = input("Define an output directory (default is currDir/images/ ): ")
 if (saveDir == ""):
     saveDir = str(Path.cwd()) + "\\images\\"
 
-previousChar = ""
-for char in saveDir:
-    char = char.capitalize()
+# previousChar = ""
+# for char in saveDir:
+#     char = char.capitalize()
+if not saveDir.endswith(('\\','\/')):
+    saveDir += "\\"
 
 
 # TODO Make default save directory
@@ -42,24 +44,34 @@ for i in range(6):
     imgs.pop()
 
 
-# print(imgs, sep='\n')
-#print("\n"+'*'*10+"\n")
+print(imgs, sep='\n')
+print("\n"+'*'*10+"\n")
 
+exit()
 
-#imgs = imgs.img["src", re("(?<=https:\/\/art\.gametdb\.com\/wii\/cover)[^B].[^B]")]
 
 i:int = 1
 str_indent = ">>> "
 
 def createSaveDir(saveDir: str | Path):
-    #a
+    DirsNeeded = [None, "2D", "full", "disc"]
+    saveDir = Path(saveDir)
+    
+    for dir in DirsNeeded:
+        if dir == None:
+            saveDir.mkdir(exist_ok=True)
+        else:
+            saveDir.joinpath(dir).mkdir(exist_ok=True)
+
+
     return
 
 for img in imgs:
     print(i, img.get('src'))
 # 
 #  #TODO LEARN HOW TO USE REGEX IN PYTHON AND BEAUTIFULSOUP4
-    coverStr = re.search("(?<=https:\/\/art\.gametdb\.com\/wii\/cover)[^B].[^B]", img.get('src')) # outputs "/.." for regular, "3D/" for 3D, "ful" for full, and ignores all secondary covers
+    coverStr = re.search("(?<=https:\/\/art\.gametdb\.com\/wii\/)(disc|cover)([^Bc\/]*)\/", img.get('src')) # outputs "/.." for regular, "3D/" for 3D, "ful" for full, and ignores all secondary covers
+    
 
     fileType = (re.search("\....(?=$|\?)", img.get('src'))).group()
 
@@ -67,13 +79,13 @@ for img in imgs:
         try:
             createSaveDir(saveDir)
 
-            if (re.match("^/", coverStr.group())): # regular cover
-                download_image(img.get("src"), saveDir + "2D\\" + gameID + ".png")
-            elif (coverStr.group() == "3D/"): # 3D cover:
-                download_image(img.get("src"), saveDir + "" + gameID + ".png")
-            elif (coverStr.group() == "ful"): # full cover:
+            if (coverStr.group() == "cover/", coverStr.group()): # regular cover
+                download_image(img.get("src"), saveDir + "2D\\" + gameID + fileType)
+            elif (coverStr.group() == "cover3D/"): # 3D cover:
+                download_image(img.get("src"), saveDir + "" + gameID + fileType)
+            elif (coverStr.group() == "coverfull/"): # full cover:
                 download_image(img.get("src"), saveDir + "full\\" + gameID + fileType)
-            elif (coverStr.group() == "dis"): # disc cover:
+            elif (coverStr.group() == "disc/"): # disc cover:
                 download_image(img.get("src"), saveDir + "disc\\" + gameID + fileType)
         except FileNotFoundError as e:
             print(str_indent, "File error:", e)
