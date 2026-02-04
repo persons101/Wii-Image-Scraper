@@ -44,14 +44,13 @@ for i in range(6):
     imgs.pop()
 
 
-print(imgs, sep='\n')
-print("\n"+'*'*10+"\n")
-
-exit()
+# print(imgs, sep='\n')
+# print("\n"+'*'*10+"\n")
 
 
 i:int = 1
 str_indent = ">>> "
+str_indent_download = "|>>"
 
 def createSaveDir(saveDir: str | Path):
     DirsNeeded = [None, "2D", "full", "disc"]
@@ -67,7 +66,7 @@ def createSaveDir(saveDir: str | Path):
     return
 
 for img in imgs:
-    print(i, img.get('src'))
+    print(i, img.get('src'), end="")
 # 
 #  #TODO LEARN HOW TO USE REGEX IN PYTHON AND BEAUTIFULSOUP4
     coverStr = re.search("(?<=https:\/\/art\.gametdb\.com\/wii\/)(disc|cover)([^Bc\/]*)\/", img.get('src')) # outputs "/.." for regular, "3D/" for 3D, "ful" for full, and ignores all secondary covers
@@ -79,20 +78,30 @@ for img in imgs:
         try:
             createSaveDir(saveDir)
 
-            if (coverStr.group() == "cover/", coverStr.group()): # regular cover
+            if (coverStr.group() == "cover/"): # regular cover
+                print("\n", str_indent_download, "Downloading 2D cover...")
                 download_image(img.get("src"), saveDir + "2D\\" + gameID + fileType)
             elif (coverStr.group() == "cover3D/"): # 3D cover:
+                print("\n", str_indent_download, "Downloading 3D cover...")
                 download_image(img.get("src"), saveDir + "" + gameID + fileType)
             elif (coverStr.group() == "coverfull/"): # full cover:
+                print("\n", str_indent_download, "Downloading full cover...")
                 download_image(img.get("src"), saveDir + "full\\" + gameID + fileType)
             elif (coverStr.group() == "disc/"): # disc cover:
+                print("\n", str_indent_download, "Downloading disc cover...")
                 download_image(img.get("src"), saveDir + "disc\\" + gameID + fileType)
+            else:
+                print(str_indent, "Non-standard file: ", img.get('src'))
+            
         except FileNotFoundError as e:
             print(str_indent, "File error:", e)
             pass
+        except Exception as e:
+            print(str_indent, e)
+            pass 
 
     else:
-        print(str_indent, img.get('src'), " " + str(img) + ": None")
+        print(" ", str_indent, str(img) + ": None")
     
     i = i+1
     
