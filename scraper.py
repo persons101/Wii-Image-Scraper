@@ -4,6 +4,8 @@ import string
 import re
 from pathlib import Path
 
+from numpy import save
+
 def download_image(url, save_as):
     urllib.request.urlretrieve(url, save_as)
 
@@ -41,30 +43,45 @@ for i in range(6):
 
 
 # print(imgs, sep='\n')
-# print("\n"+'*'*10+"\n")
+#print("\n"+'*'*10+"\n")
+
 
 #imgs = imgs.img["src", re("(?<=https:\/\/art\.gametdb\.com\/wii\/cover)[^B].[^B]")]
 
+i:int = 1
+str_indent = ">>> "
+
+def createSaveDir(saveDir: str | Path):
+    #a
+    return
 
 for img in imgs:
-# #TODO LEARN HOW TO USE REGEX IN PYTHON AND BEAUTIFULSOUP4
+    print(i, img.get('src'))
+# 
+#  #TODO LEARN HOW TO USE REGEX IN PYTHON AND BEAUTIFULSOUP4
     coverStr = re.search("(?<=https:\/\/art\.gametdb\.com\/wii\/cover)[^B].[^B]", img.get('src')) # outputs "/.." for regular, "3D/" for 3D, "ful" for full, and ignores all secondary covers
 
-    fileType = (re.search("....$", img.get('src'))).group()
+    fileType = (re.search("\....(?=$|\?)", img.get('src'))).group()
 
     if (coverStr):
-        if (re.match("^/", coverStr.group())): # regular cover
-            download_image(img.get("src"), saveDir + "2D\\" + gameID + ".png")
-        elif (coverStr.group() == "3D/"): # 3D cover:
-            download_image(img.get("src"), saveDir + "" + gameID + ".png")
-        elif (coverStr.group() == "ful"): # full cover:
-            download_image(img.get("src"), saveDir + "full\\" + gameID + fileType)
-        elif (coverStr.group() == "dis"): # disc cover:
-            download_image(img.get("src"), saveDir + "disc\\" + gameID + fileType)
+        try:
+            createSaveDir(saveDir)
 
+            if (re.match("^/", coverStr.group())): # regular cover
+                download_image(img.get("src"), saveDir + "2D\\" + gameID + ".png")
+            elif (coverStr.group() == "3D/"): # 3D cover:
+                download_image(img.get("src"), saveDir + "" + gameID + ".png")
+            elif (coverStr.group() == "ful"): # full cover:
+                download_image(img.get("src"), saveDir + "full\\" + gameID + fileType)
+            elif (coverStr.group() == "dis"): # disc cover:
+                download_image(img.get("src"), saveDir + "disc\\" + gameID + fileType)
+        except FileNotFoundError as e:
+            print(str_indent, "File error:", e)
+            pass
 
     else:
-        print(str(img) + ": None")
-        print(img.get('src'))
+        print(str_indent, img.get('src'), " " + str(img) + ": None")
+    
+    i = i+1
     
     
